@@ -58,7 +58,7 @@ hidden_size = 50
 
 
 #load image
-img = cv.imread('./dataset/beach1.jpg')
+img = cv.imread('./dataset/p6.jpg')
 height, width, channel = img.shape
 
 ##conversion process with a classical color to gray conversion formula
