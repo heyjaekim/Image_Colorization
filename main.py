@@ -12,6 +12,7 @@ def find_similar_patch(target_patch, find_image, similar_patch_num, patch_size):
     best_similar = []
     patcher = patch_size // 2
     patcher_i = float(patch_size * patch_size)
+    error_list = []
     for y in range(patcher, height-patcher):
         for x in range(patcher, width-patcher):
             #processing simialrity with mean square error                
@@ -27,9 +28,11 @@ def find_similar_patch(target_patch, find_image, similar_patch_num, patch_size):
             else:
                 if(best_similar[similar_patch_num-1][2] > err):
                     best_similar[similar_patch_num-1] = [y,x,err]
-                    best_similar.sort(key = lambda x: x[2])        
+                    best_similar.sort(key = lambda x: x[2])     
+            
+            error_list.append([err])   
     
-    return best_similar
+    return best_similar, error_list     
 
 def color_to_label(input_color, target_color_list, k):
     result = [0] * k
@@ -58,7 +61,7 @@ hidden_size = 50
 
 
 #load image
-img = cv.imread('./dataset/p6.jpg')
+img = cv.imread('./dataset/p3.jpg')
 height, width, channel = img.shape
 
 ##conversion process with a classical color to gray conversion formula
@@ -101,19 +104,18 @@ train_i = cv.copyMakeBorder(left_train_gray_img,patcher,patcher,patcher,patcher,
 test_i_height, test_i_width = test_i.shape
 train_i_height, train_i_width = train_i.shape
 
-
 #The Basic Coloring Agent
 if(not skip_knn):
     print('Running the basic agent (knn)...')
     colored_right_img = np.zeros((height,int(width/2),3), np.uint8)
-
+    similarity_measure = []
     for y in range(patcher, test_i_height-patcher):
         for x in range(patcher, test_i_width-patcher):
 
             #For every 3x3 grayscale pixel patch in the test data (right half of the image), 
             #ﬁnd the six most similar 3x3 grayscale pixel patches in the training data (left half of the image). 
             #For each of the selected patches in the training data, take the representative color of the middle pixel.
-            best_similar = find_similar_patch(test_i[y-patcher:y+patcher+1, x-patcher:x+patcher+1], train_i, similar_patch_num, patch_size)
+            best_similar, error_list = find_similar_patch(test_i[y-patcher:y+patcher+1, x-patcher:x+patcher+1], train_i, similar_patch_num, patch_size)
             
             #If there is a majority representative color, take that representative color to be the color of the middle pixel in the test data patch.
             #If there is no majority representative color or there is a tie, 
@@ -134,11 +136,23 @@ if(not skip_knn):
             #In this way, select a color for the middle pixel of each 3x3 grayscale patch in the test data, 
             #and in doing so generate a coloring of the right half of the image.       
             colored_right_img[y-patcher, x-patcher] = res2[best_similar[0][0]-patcher, best_similar[0][1]-patcher]
-        
+            
+            #append similarity measurement into the measurement list.
+            #similarity_measure.append((best_similar[0][0]-patcher + best_similar[0][1]-patcher)/(x+y))
+            similarity_measure.append(best_similar[0][2])
         print(y, '/', test_i_height-patcher)
 
     cv.imshow('recolored image with basic agent', colored_right_img)
     cv.waitKey(0)
+
+    #display model loss per epoch
+    plt.plot(similarity_measure)
+    plt.title('Similarity Measurement')
+    plt.ylabel('mean sqrd error')
+    plt.xlabel('pixels')
+    #plt.legend(['train', 'test'], loc = 'upper left')
+    plt.show()
+
 
 #The Improved Agent
 #Create train_data with the left half of the image
