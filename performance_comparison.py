@@ -15,7 +15,7 @@ patch_size = 3   #it must be odd number
 patcher = patch_size // 2 
 similar_patch_num = 6
 skip_knn = False
-skip_display = True
+skip_display = False
 # hyperparameter for improved agent
 iters_num = 1000
 batch_size = 100
@@ -211,7 +211,7 @@ if __name__ == '__main__':
     for data_i in range(len(data_list)):
         print('image data :', data_i + 1, '/', len(data_list))
         #load image
-        img = cv.imread('dataset\\' + data_list[data_i] + '.jpg')
+        img = cv.imread('performance_dataset\\' + data_list[data_i] + '.jpg')
         height, width, channel = img.shape
 
         #conversion process with a classical color to gray conversion formula
