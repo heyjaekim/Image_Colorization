@@ -20,7 +20,7 @@ However, by training a model on similar images, we can make contextually-informe
     - Gray colors will be recolored by comparing the similiarties of the representing colors that are extracted from the trained dataset.
 
 2. Improved Agent
-    - Used KNN and 2-layered NN algorithm.
+    - Used KNN and 2-layered NN algorithms, and reduced the data loss by using softmax function and back propagation function. 
 
 3. Both Basic Agent and Improved Agent are coded in the main.py
 
